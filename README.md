@@ -44,6 +44,15 @@ GET https://404-service.com/reason
 }
 ```
 
+### 📊 Stats Endpoint
+**URL:** `/stats`  
+Returns the total number of reasons served by this instance.
+```json
+{
+  "totalFetches": 42
+}
+```
+
 Use it in custom 404 pages, bots, landing pages, Slack integrations, or wherever you need a witty explanation for a missing page.
 
 ---
@@ -105,8 +114,12 @@ Traefik will automatically obtain a Let's Encrypt certificate and serve your sit
 
 ```
 404-service/
-├── index.js            # Express API
+├── index.js            # Express API & persistence logic
 ├── reasons.json        # 1000+ creative 404 reasons
+├── stats.json          # Persistent fetch counter (auto-generated)
+├── public/             # Frontend assets
+│   ├── index.html      # Landing page & previewer
+│   └── no.png          # Logo
 ├── package.json
 ├── .devcontainer.json  # VS Code / Github devcontainer setup
 └── README.md

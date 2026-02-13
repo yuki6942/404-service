@@ -278,6 +278,10 @@
                     Click the button below to see a sample reason...
                 </div>
                 <button onclick="fetchReason()" class="btn" id="fetchBtn">Test Reason </button>
+                
+                <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+                    Total reasons served: <span id="fetchCount" style="color: var(--text-main); font-weight: 600;">...</span>
+                </div>
             </div>
         </div>
 
@@ -290,12 +294,18 @@
         // Set dynamic URL based on config or current host
         async function loadConfig() {
             try {
-                const response = await fetch('/config');
-                const config = await response.json();
+                const [configRes, statsRes] = await Promise.all([
+                    fetch('/config'),
+                    fetch('/stats')
+                ]);
+                const config = await configRes.json();
+                const stats = await statsRes.json();
+                
                 const cleanUrl = config.baseUrl.replace(/\/$/, ''); // Remove trailing slash
                 document.getElementById('apiUrl').innerText = `${cleanUrl}/reason`;
+                document.getElementById('fetchCount').innerText = stats.totalFetches.toLocaleString();
             } catch (error) {
-                console.error('Failed to load config:', error);
+                console.error('Failed to load initial data:', error);
                 const origin = window.location.origin;
                 document.getElementById('apiUrl').innerText = `${origin}/reason`;
             }
@@ -328,10 +338,17 @@
                 // Add a small delay for dramatic effect
                 setTimeout(() => {
                     preview.style.opacity = '0';
-                    setTimeout(() => {
+                    setTimeout(async () => {
                         preview.innerText = `"${data.reason}"`;
                         preview.style.opacity = '1';
                         btn.disabled = false;
+                        
+                        // Update counter after fetch
+                        try {
+                            const statsRes = await fetch('/stats');
+                            const stats = await statsRes.json();
+                            document.getElementById('fetchCount').innerText = stats.totalFetches.toLocaleString();
+                        } catch (e) {}
                     }, 200);
                 }, 400);
             } catch (error) {
